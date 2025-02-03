@@ -1,6 +1,7 @@
 
 import logger from './logger.mjs';
-import fs from 'node:fs'
-// const data = fs.readFileSync('./index.mjs');
-// logger.info(data);
-fs.writeFileSync('./file.txt', ["kuku", "kukureku", "Hello World!", "Shalom!"].join('\n'), 'utf8');
+import {readFile, writeFile} from 'node:fs/promises'
+const data = await readFile('./file.txt','utf-16le')
+console.log(data)
+writeFile('./file.txt', ["kuku", "kukureku", "שלום"].join('\n'), 'utf-16le')
+logger.info("function finished");
