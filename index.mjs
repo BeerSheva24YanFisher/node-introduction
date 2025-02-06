@@ -1,41 +1,24 @@
 import logger from './logger.mjs';
+import logDistribution from './logDistribution.mjs';
+import logFilter from './logFilter.mjs';
 
-class MainController {
-  constructor() {
-    logger.on('message', (data) => {
-      console.log(`[LOG]: ${data.level.toUpperCase()} - ${data.message}`);
-    });
+logger.log('info', 'Hello world!');
+logger.log('info', 'This is a test message!');
+logger.log('info1', 'Hello world1!');
+logger.log('info1', 'This is a test message1!');
+logger.log('info', 'Another hello message!');
 
-    logger.on('error', (msg) => {
-      console.error(`[ERROR]: ${msg}`);
-    });
-  }
+console.log('Message distribution:', logDistribution.getDistribution());
 
-  run() {
-    logger.log('info', 'Запуск приложения');
-    
-    try {
-      this.doSomething();
-    } catch (error) {
-      logger.log('error', `Ошибка в doSomething: ${error.message}`);
-    }
-  }
+console.log(
+  'Messages with level "info" containing "hello":',
+  logFilter.getMessagesByLevelAndKeyword('info', 'hello')
+);
 
-  doSomething() {
-    logger.log('debug', 'Выполняется doSomething...');
-    
-    if (Math.random() > 0.5) {
-      throw new Error('Случайная ошибка');
-    }
-
-    logger.log('info', 'doSomething выполнен успешно');
-  }
-}
-
-const app = new MainController();
-app.run();
-
-
+console.log(
+  'Messages with level "info1" containing "hello":',
+  logFilter.getMessagesByLevelAndKeyword('info1', 'hello')
+);
 
 
 
