@@ -1,17 +1,44 @@
-import PointService from "../service/PointService.mjs";
-import PrototypeProtocol from "./prototype-protocol.mjs";
-import http from 'node:http'
+import service from "../service/Service.mjs";
+import protocolObj from "../protocol/protocol.mjs";
+import http from "node:http";
 
 const server = http.createServer();
-const service = new PointService()
-const protocol = new PrototypeProtocol(service, server);
+
+function protocol(protocolObj) {
+  //subscribing
+  for (const eventName in protocolObj) {
+    server.on(eventName, protocolObj[eventName]);
+  }
+}
+protocol(protocolObj);
 
 server.listen(3500);
-server.on('request', async (req, res) => {
-   let data = '';
-   for await (const part of req) {
+const eventNames = server.eventNames();
+server.on("request", async (req, res) => {
+  let data = "";
+  const eventName = req.url;
+  if (!eventNames.includes(eventName)) {
+    sendResponse(res, 404, `${eventName} dosn't exist`);
+  } else {
+    for await (const part of req) {
       data += part;
-   }
-   server.emit(req.url, data, res); 
-  
-})
+    }
+
+    const { code, response } = await getResponse(data, eventName);
+    sendResponse(res, code, response);
+  }
+});
+function sendResponse(res, code, response) {
+  res.statusCode = code;
+  res.write(response);
+  res.end();
+}
+
+async function getResponse(data, eventName) {
+  return new Promise((resolve) => {
+    server.on("response", (response) => {
+      resolve(response);
+    });
+    server.emit(eventName, data, server, service);
+  });
+}
